@@ -9,6 +9,10 @@ spring:
       name: user
       password: password
 
+jwt:
+  secret: miClaveSecretaSuperSeguraParaJWT2024CarWashProyecto
+  expiration: 3600000
+
 eureka:
   client:
     service-url:
