@@ -15,7 +15,7 @@ public class BookingDTO {
     private String washType;
     private String status;
 
-    // Getters y setters manuales
+    // Getters y setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

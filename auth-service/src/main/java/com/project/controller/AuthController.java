@@ -1,7 +1,7 @@
 package com.project.controller;
+
 import com.project.model.AuthResponse;
 import com.project.model.JwtValidationResponse;
-
 import com.project.model.LogingRequest;
 import com.project.service.AuthService;
 import com.project.service.JwtService;
@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+
     private final AuthService authService;
     private final JwtService jwtService;
 
@@ -25,20 +26,28 @@ public class AuthController {
             String token = authService.authenticate(request.getUsername(), request.getPassword());
             AuthResponse response = new AuthResponse(token, 3600L);
             return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
+        } catch (RuntimeException e) {
+            AuthResponse errorResponse = new AuthResponse();
+            errorResponse.setToken(null);
+            errorResponse.setExpiresIn(0L);
+            return ResponseEntity.badRequest().body(errorResponse);
         }
     }
-
     @PostMapping("/validate")
     public ResponseEntity<JwtValidationResponse> validateToken(@RequestParam String token) {
-        boolean isValid = jwtService.validateToken(token);
-        String message = isValid ? "Token válido" : "Token inválido";
-        return ResponseEntity.ok(new JwtValidationResponse(isValid, message));
+        try {
+            boolean isValid = jwtService.validateToken(token);
+            JwtValidationResponse response = new JwtValidationResponse(isValid,
+                    isValid ? "Token válido" : "Token inválido");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            JwtValidationResponse response = new JwtValidationResponse(false, "Error validando token");
+            return ResponseEntity.badRequest().body(response);
+        }
     }
 
     @GetMapping("/test")
     public String test() {
-        return "Auth Service with JWT is working!";
+        return "Auth Service is working!";
     }
 }

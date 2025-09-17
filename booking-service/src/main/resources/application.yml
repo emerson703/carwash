@@ -9,10 +9,6 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password: password
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -22,19 +18,46 @@ spring:
         dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://localhost:8761/eureka/
-
+# ✅ CONFIGURACIÓN FEIGN (SOLO lo esencial)
 feign:
   client:
     config:
       default:
-        connectTimeout: 5000
-        readTimeout: 5000
-        loggerLevel: basic
+        connectTimeout: 5000    # 5 segundos timeout de conexión
+        readTimeout: 5000       # 5 segundos timeout de lectura
+        loggerLevel: basic      # Logging básico para debugging
 
+#  ELIMINAR toda esta sección de Resilience4j
+# resilience4j:
+#   circuitbreaker:
+#     instances:
+#       authService:
+#         register-health-indicator: true
+#         sliding-window-size: 10
+#         minimum-number-of-calls: 5
+#         wait-duration-in-open-state: 10s
+#         failure-rate-threshold: 50
+#         permitted-number-of-calls-in-half-open-state: 3
+#   retry:
+#     instances:
+#       authServiceRetry:
+#         max-attempts: 3
+#         wait-duration: 2s
+
+# ELIMINAR circuitbreaker de Feign (por ahora)
+# feign:
+#   circuitbreaker:
+#     enabled: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+
+#  Opcional: Configuración de logging para debugging
 logging:
   level:
     com.carwash.booking: DEBUG
+    org.springframework.cloud.openfeign: DEBUG

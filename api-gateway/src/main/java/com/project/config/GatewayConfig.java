@@ -22,7 +22,7 @@ public class GatewayConfig {
                                 .rewritePath("/api/bookings/(?<segment>.*)", "/${segment}"))
                         .uri("lb://booking-service"))
 
-                // Ruta para Wash Service (futuro)
+                // Ruta para Wash Service
                 .route("wash-service", r -> r
                         .path("/api/washes/**")
                         .filters(f -> f

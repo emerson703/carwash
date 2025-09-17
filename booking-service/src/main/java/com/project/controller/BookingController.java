@@ -2,8 +2,9 @@ package com.project.controller;
 
 import com.project.dto.BookingDTO;
 import com.project.dto.BookingRequestDTO;
+import com.project.dto.JwtValidationResponse;
+import com.project.service.AuthServiceClient;
 import com.project.service.BookingService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,50 +12,106 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/bookings")
-
 public class BookingController {
-    private final BookingService bookingService;
 
-    public BookingController(BookingService bookingService) {
+    private final BookingService bookingService;
+    private final AuthServiceClient authServiceClient;
+
+    public BookingController(BookingService bookingService, AuthServiceClient authServiceClient) {
         this.bookingService = bookingService;
+        this.authServiceClient = authServiceClient;
     }
+
+    // Listar TODAS las reservas
     @GetMapping
-    public ResponseEntity<List<BookingDTO>> getAllBookings() {
+    public ResponseEntity<List<BookingDTO>> getAllBookings(
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+
+        // Validar token si está presente
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            JwtValidationResponse validation = authServiceClient.validateToken(token);
+            if (!validation.isValid()) {
+                return ResponseEntity.status(401).build();
+            }
+        }
+
         return ResponseEntity.ok(bookingService.getAllBookings());
     }
 
-    // 2. Obtener reserva por ID
+    // Obtener reserva por ID
     @GetMapping("/{id}")
     public ResponseEntity<BookingDTO> getBookingById(@PathVariable Long id) {
-        return bookingService.getBookingById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        BookingDTO booking = bookingService.getBookingById(id)
+                .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
+        return ResponseEntity.ok(booking);
     }
 
-    // 3. Reservas por cliente
+    // Reservas por cliente
     @GetMapping("/customer/{customerId}")
-    public ResponseEntity<List<BookingDTO>> getBookingsByCustomerId(@PathVariable Long customerId) {
+    public ResponseEntity<List<BookingDTO>> getBookingsByCustomerId(
+            @PathVariable Long customerId,
+            @RequestHeader(value = "Authorization", required = false) String authHeader) {
+
+        // Validar token si está presente
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            JwtValidationResponse validation = authServiceClient.validateToken(token);
+            if (!validation.isValid()) {
+                return ResponseEntity.status(401).build();
+            }
+        }
+
         return ResponseEntity.ok(bookingService.getBookingsByCustomerId(customerId));
     }
 
-    // 4. Crear nueva reserva
+    // Crear nueva reserva
     @PostMapping
-    public ResponseEntity<BookingDTO> createBooking(@RequestBody BookingRequestDTO bookingRequest) {
-        return ResponseEntity.ok(bookingService.createBooking(bookingRequest));
+    public ResponseEntity<BookingDTO> createBooking(
+            @RequestBody BookingRequestDTO bookingRequest,
+            @RequestHeader("Authorization") String authHeader) {
+
+        // Validar token
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).build();
+        }
+
+        String token = authHeader.substring(7);
+        JwtValidationResponse validation = authServiceClient.validateToken(token);
+
+        if (!validation.isValid()) {
+            return ResponseEntity.status(401).build();
+        }
+
+        BookingDTO createdBooking = bookingService.createBooking(bookingRequest);
+        return ResponseEntity.ok(createdBooking);
     }
 
-    // 5. Eliminar reserva
+    // Eliminar reserva
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBooking(@PathVariable Long id) {
-        if (bookingService.deleteBooking(id)) {
-            return ResponseEntity.ok().build();
+    public ResponseEntity<Void> deleteBooking(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String authHeader) {
+
+        // Validar token
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(401).build();
         }
-        return ResponseEntity.notFound().build();
+
+        String token = authHeader.substring(7);
+        JwtValidationResponse validation = authServiceClient.validateToken(token);
+
+        if (!validation.isValid()) {
+            return ResponseEntity.status(401).build();
+        }
+
+        bookingService.deleteBooking(id);
+        return ResponseEntity.ok().build();
     }
 
     // Test endpoint
     @GetMapping("/test")
     public String test() {
-        return "Booking Service is working!";
+        return "Booking Service is working with Feign!";
     }
 }

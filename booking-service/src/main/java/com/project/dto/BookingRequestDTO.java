@@ -10,7 +10,7 @@ public class BookingRequestDTO {
     private LocalDateTime bookingTime;
     private String washType;
 
-    // Getters y setters manuales
+    // Getters y setters 
     public Long getCustomerId() { return customerId; }
     public void setCustomerId(Long customerId) { this.customerId = customerId; }
 

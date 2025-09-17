@@ -1,9 +1,11 @@
 package com.project.service;
+
 import com.project.dto.BookingDTO;
 import com.project.dto.BookingRequestDTO;
 import com.project.entity.Booking;
+import com.project.exception.BookingNotFoundException;
+import com.project.exception.InvalidBookingException;
 import com.project.repository.BookingRepository;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +16,13 @@ import java.util.stream.Collectors;
 @Service
 public class BookingService {
     private final BookingRepository bookingRepository;
-    //private final BookingMapper bookingMapper;
 
     @Autowired
     public BookingService(BookingRepository bookingRepository) {
         this.bookingRepository = bookingRepository;
     }
 
-    // 1. Listar TODAS las reservas
+    // Listar TODAS las reservas
     public List<BookingDTO> getAllBookings() {
         return bookingRepository.findAll()
                 .stream()
@@ -29,38 +30,77 @@ public class BookingService {
                 .collect(Collectors.toList());
     }
 
-    // 2. Obtener reserva por ID
+    // Obtener reserva por ID
     public Optional<BookingDTO> getBookingById(Long id) {
-        Optional<Booking> booking = bookingRepository.findById(id);
-        return booking.map(this::convertToDTO);
+        return bookingRepository.findById(id)
+                .map(this::convertToDTO)
+                .or(() -> {
+                    throw new BookingNotFoundException(id);
+                });
     }
 
-    // 3. Reservas por cliente
+    // Reservas por cliente
     public List<BookingDTO> getBookingsByCustomerId(Long customerId) {
-        return bookingRepository.findByCustomerId(customerId)
-                .stream()
+        List<Booking> bookings = bookingRepository.findByCustomerId(customerId);
+
+        if (bookings.isEmpty()) {
+            throw new BookingNotFoundException("No se encontraron reservas para el cliente ID: " + customerId);
+        }
+
+        return bookings.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    // 4. Crear nueva reserva
+    //  Crear nueva reserva
     public BookingDTO createBooking(BookingRequestDTO bookingRequest) {
+        //  Validaciones con excepciones personalizadas
+        validateBookingRequest(bookingRequest);
+
         Booking booking = convertRequestToEntity(bookingRequest);
         booking.setStatus("PENDING"); // Estado por defecto
         Booking savedBooking = bookingRepository.save(booking);
         return convertToDTO(savedBooking);
     }
 
-    // 5. Eliminar reserva
+    // Eliminar reserva
     public boolean deleteBooking(Long id) {
-        if (bookingRepository.existsById(id)) {
-            bookingRepository.deleteById(id);
-            return true;
+        if (!bookingRepository.existsById(id)) {
+            throw new BookingNotFoundException(id);
         }
-        return false;
+
+        bookingRepository.deleteById(id);
+        return true;
     }
 
-    // ===== MÉTODOS DE CONVERSIÓN MANUALES =====
+
+    private void validateBookingRequest(BookingRequestDTO request) {
+        if (request.getCustomerName() == null || request.getCustomerName().trim().isEmpty()) {
+            throw new InvalidBookingException("El nombre del cliente es requerido");
+        }
+
+        if (request.getPlaca() == null || request.getPlaca().trim().isEmpty()) {
+            throw new InvalidBookingException("La placa del vehículo es requerida");
+        }
+
+        if (request.getVehicleType() == null || request.getVehicleType().trim().isEmpty()) {
+            throw new InvalidBookingException("El tipo de vehículo es requerido");
+        }
+
+        if (request.getWashType() == null || request.getWashType().trim().isEmpty()) {
+            throw new InvalidBookingException("El tipo de lavado es requerido");
+        }
+
+        if (request.getBookingTime() == null) {
+            throw new InvalidBookingException("La fecha y hora de la reserva son requeridas");
+        }
+
+        if (request.getCustomerId() == null) {
+            throw new InvalidBookingException("El ID del cliente es requerido");
+        }
+    }
+
+    //  MÉTODOS DE CONVERSIÓN
 
     private BookingDTO convertToDTO(Booking booking) {
         BookingDTO dto = new BookingDTO();
