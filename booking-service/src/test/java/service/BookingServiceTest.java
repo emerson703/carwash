@@ -39,7 +39,7 @@ class BookingServiceTest {
         booking.setCustomerId(10L);
         booking.setCustomerName("Juan Pérez");
         booking.setVehicleType("Auto");
-        booking.setPlaca("ABC-123");
+        booking.setCarLicense("ABC-123");
         booking.setBookingTime(LocalDateTime.now());
         booking.setWashType("Premium");
         booking.setStatus("PENDING");
@@ -73,7 +73,7 @@ class BookingServiceTest {
         request.setCustomerId(10L);
         request.setCustomerName("Juan Pérez");
         request.setVehicleType("Auto");
-        request.setPlaca("ABC-123");
+        request.setCarLicense("ABC-123");
         request.setBookingTime(LocalDateTime.now());
         request.setWashType("Premium");
 

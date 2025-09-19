@@ -6,7 +6,7 @@ public class BookingRequestDTO {
     private Long customerId;
     private String customerName;
     private String vehicleType;
-    private String placa;
+    private String carLicense;
     private LocalDateTime bookingTime;
     private String washType;
 
@@ -20,8 +20,8 @@ public class BookingRequestDTO {
     public String getVehicleType() { return vehicleType; }
     public void setVehicleType(String vehicleType) { this.vehicleType = vehicleType; }
 
-    public String getPlaca() { return placa; }
-    public void setPlaca(String placa) { this.placa = placa; }
+    public String getCarLicense() { return carLicense; }
+    public void setCarLicense(String carLicense) { this.carLicense = carLicense; }
 
     public LocalDateTime getBookingTime() { return bookingTime; }
     public void setBookingTime(LocalDateTime bookingTime) { this.bookingTime = bookingTime; }

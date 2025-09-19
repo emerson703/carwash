@@ -79,7 +79,7 @@ public class BookingService {
             throw new InvalidBookingException("El nombre del cliente es requerido");
         }
 
-        if (request.getPlaca() == null || request.getPlaca().trim().isEmpty()) {
+        if (request.getCarLicense() == null || request.getCarLicense().trim().isEmpty()) {
             throw new InvalidBookingException("La placa del vehículo es requerida");
         }
 
@@ -108,7 +108,7 @@ public class BookingService {
         dto.setCustomerId(booking.getCustomerId());
         dto.setCustomerName(booking.getCustomerName());
         dto.setVehicleType(booking.getVehicleType());
-        dto.setPlaca(booking.getPlaca());
+        dto.setCarLicense(booking.getCarLicense());
         dto.setBookingTime(booking.getBookingTime());
         dto.setWashType(booking.getWashType());
         dto.setStatus(booking.getStatus());
@@ -120,7 +120,7 @@ public class BookingService {
         booking.setCustomerId(request.getCustomerId());
         booking.setCustomerName(request.getCustomerName());
         booking.setVehicleType(request.getVehicleType());
-        booking.setPlaca(request.getPlaca());
+        booking.setCarLicense(request.getCarLicense());
         booking.setBookingTime(request.getBookingTime());
         booking.setWashType(request.getWashType());
         return booking;

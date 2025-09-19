@@ -22,7 +22,7 @@ public class Booking {
     private String vehicleType; // Carro, moto, camioneta
 
     @Column(nullable = false)
-    private String placa;
+    private String carLicense;
 
     @Column(nullable = false)
     private LocalDateTime bookingTime;
@@ -65,12 +65,12 @@ public class Booking {
         this.vehicleType = vehicleType;
     }
 
-    public String getPlaca() {
-        return placa;
+    public String getCarLicense() {
+        return carLicense;
     }
 
-    public void setPlaca(String placa) {
-        this.placa = placa;
+    public void setCarLicense(String carLicense) {
+        this.carLicense = carLicense;
     }
 
     public LocalDateTime getBookingTime() {
